@@ -1,9 +1,7 @@
 #pragma once
 
-#include <vector>
-#include <unordered_map>
-
 #include "Structures.h"
+#include <map>
 
 class Serializer 
 {
@@ -14,8 +12,5 @@ public:
     static uint8_t* serialize(const Node *node, uint32_t *outLength);
 
 private:
-	static void serialize(std::vector<uint8_t>* buffer, uint32_t const& value);
-
-	static void serialize(std::vector<uint8_t>* buffer, std::string const& value);
-
+	static void buildNodeMapping(const Node *node, std::map<const Node*, unsigned>& map);
 };

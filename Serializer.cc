@@ -3,6 +3,8 @@
 #include <map>
 #include <vector>
 
+
+
 /** 
  * Data layout:
  *      | name field | '\0' | dataCount | id (8-bits) | id (8-bits) | id (8-bits) | id (8-bits)
@@ -14,39 +16,46 @@ uint8_t* Serializer::serialize(const Node *node, uint32_t *outLength)
         return nullptr;
     }
 
-    std::vector<uint8_t>* buffer = new std::vector<uint8_t>();
+    std::map<const Node*, unsigned> nodeMap;
+    buildNodeMapping(node, nodeMap);
 
-    serialize(buffer, node->name);
-    
-    //------ Serialize Nodes
-    buffer->push_back(node->dataCount);
+    outLength = (uint32_t*) nodeMap.size();
 
-    for(int i = 0; i < node->dataCount; i++)
+    //uint8_t* data = new uint8_t[sizeof(SerNode) * node count + sizeof(uint32_t)];
+    uint8_t* data = new uint8_t[sizeof(Node) * (*outLength)];
+
+    while(node)
     {
-        Data d = node->data[i];
+        Node serNode = *node;
+        
+        serNode.next = reinterpret_cast<Node*>(nodeMap[node->next]);
+        serNode.prev = reinterpret_cast<Node*>(nodeMap[node->prev]);
 
-        serialize(buffer, d.id);
-        serialize(buffer, d.x);
-        serialize(buffer, d.y);
+        // Error
+        //data[0] = reinterpret_cast<uint8_t*>(&serNode);
+        node = node->next;
     }
-    //------ End nodes
-    
-    buffer->shrink_to_fit();
-    *outLength = static_cast<uint32_t>(buffer->size());
-    return reinterpret_cast<uint8_t*>(buffer->data());
+
+    //MyStruct* wholeStruct = static_cast<MyStruct*>(data);
+
+    return data;
 }
 
-void Serializer::serialize(std::vector<uint8_t>* buffer, uint32_t const& value)
+void Serializer::buildNodeMapping(const Node *node, std::map<const Node*, unsigned>& nodeMap)
 {
-    buffer->push_back((value >> 24 & 0xFF));
-    buffer->push_back((value >> 16 & 0xFF));
-    buffer->push_back((value >> 8 & 0xFF));
-    buffer->push_back((value & 0xFF));
+    while(node)
+    {
+        unsigned n = nodeMap.size();
+        auto ret = nodeMap.insert( std::pair<const Node*, unsigned>(node, n));
+        
+        
+        // Stop if inserted object already exists
+        if(ret.second == false)
+        {
+            break;
+        }
+
+        node = node->next;
+    }
 }
 
-void Serializer::serialize(std::vector<uint8_t>* buffer, std::string const& value)
-{
-    buffer->insert(buffer->end(), value.begin(), value.end());
-    // Add null terminating character
-    buffer->push_back('\0');
-}
