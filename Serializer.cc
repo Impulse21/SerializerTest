@@ -24,19 +24,22 @@ uint8_t* Serializer::serialize(const Node *node, uint32_t *outLength)
     //uint8_t* data = new uint8_t[sizeof(SerNode) * node count + sizeof(uint32_t)];
     uint8_t* data = new uint8_t[sizeof(Node) * (*outLength)];
 
+
+    SerializedNode* nodes = reinterpret_cast<SerializedNode*>(data);
+    
     while(node)
     {
-        Node serNode = *node;
+        //Node* node = 
         
-        serNode.next = reinterpret_cast<Node*>(nodeMap[node->next]);
-        serNode.prev = reinterpret_cast<Node*>(nodeMap[node->prev]);
+        //serNode.next = reinterpret_cast<Node*>(nodeMap[node->next]);
+        //serNode.prev = reinterpret_cast<Node*>(nodeMap[node->prev]);
 
         // Error
         //data[0] = reinterpret_cast<uint8_t*>(&serNode);
         node = node->next;
     }
 
-    //MyStruct* wholeStruct = static_cast<MyStruct*>(data);
+    //git
 
     return data;
 }

@@ -3,6 +3,18 @@
 #include "Structures.h"
 #include <map>
 
+
+struct SerializedNode
+{
+	int *prevNodeIndex;
+    int *nextNodeIndex;  
+
+    std::string name;
+
+    uint8_t dataCount;
+    Data *data;   
+};
+
 class Serializer 
 {
 public:
