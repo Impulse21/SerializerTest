@@ -1,8 +1,6 @@
 # Serialization and Deserialization - C++ Edition
-# ===============================================
 
 ## Problem Definition
-## ------------------
 
 You are tasked with writing a serialization system for an online service, such as might be used for a
 game engine.
@@ -18,7 +16,6 @@ build and test the project, for example:
  #> ./DevTestTests
 
 ## Restrictions
-## ------------
 - Don't use any built in compression or serialization tools or libraries
 - Don't use any third party compression or serialization tools or libraries
 - Please do not submit hidden files (.idea, .DS_Store, Thumbs.db, etc) with your solution.
