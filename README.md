@@ -11,7 +11,9 @@ the tests pass.
 
 A CMakeLists.txt file is provided for convenience. It should support everything you need to
 build and test the project, for example:
- #> cmake .
+ #> mkdir build
+ #> cd build
+ #> cmake ..
  #> make
  #> ./DevTestTests
 
