@@ -23,7 +23,12 @@ Node* Deserializer::deserialize(const uint8_t* data, uint32_t dataLength)
         Node n;
         n.name = serializedNode[i].name;
         n.dataCount = serializedNode[i].dataCount;
-        n.data =  serializedNode[i].data;
+        
+        if(n.dataCount > 0)
+        {
+            n.data = new Data[sizeof(Data) * n.dataCount];
+            n.data = serializedNode[i].data;
+        }
         
         nodes->push_back(n);
     }
