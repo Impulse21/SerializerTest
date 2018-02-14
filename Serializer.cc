@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 
-
 uint8_t* Serializer::serialize(const Node *node, uint32_t *outLength) 
 {
     if(node == nullptr)
