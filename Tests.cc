@@ -32,10 +32,6 @@ TEST_CASE("simpleRoundtrip", "[Serializer]") {
     REQUIRE_FALSE(result == nullptr);
     REQUIRE_FALSE(result == &node);
     CHECK(result->name == node.name);
-
-    // TODO: Remove, but this prevents meme leaks
-    if(result)
-        delete(result);
 }
 
 TEST_CASE("dataRoundTrip", "[Serializer]") {

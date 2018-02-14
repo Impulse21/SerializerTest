@@ -1,5 +1,6 @@
 #include "Deserializer.h"
 
+#include "Serializer.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -13,61 +14,31 @@ Node* Deserializer::deserialize(const uint8_t* data, uint32_t dataLength)
         return nullptr;
     }
 
-    int currentOffset = 0;
+    const SerializedNode* serializedNode = reinterpret_cast<const SerializedNode*>(data);
+
     std::vector<Node>* nodes = new std::vector<Node>();
-    Node n;
 
-    deserialize(data, currentOffset, n.name);
-    n.dataCount = data[currentOffset];
-    currentOffset++;
-    
-    
-    //-------- Deserailize data nodes
-    if(n.dataCount > 0)
+    for(int i = 0; i < dataLength; i++)
     {
-        // This has to be dynamically allocated because of the node destructor.
-        n.data = static_cast<Data *>(malloc(sizeof(Data) * 2));
+        Node n;
+        n.name = serializedNode[i].name;
+        n.dataCount = serializedNode[i].dataCount;
+        n.data =  serializedNode[i].data;
         
+        nodes->push_back(n);
     }
-    
-    for(int i = 0; i < n.dataCount; i++)
+
+    std::cout << nodes->size() << std::endl;
+    for(int i = 0; i < dataLength; i++)
     {
-        Data* d = &n.data[i];
-        deserialize(data, currentOffset, d->id);
-        
-        uint32_t v = 0;
-        deserialize(data, currentOffset, v);
-        d->x = static_cast<float>(v);
-        
-        deserialize(data, currentOffset, v);
-        d->y = static_cast<float>(v);
+        unsigned int nextIndex = serializedNode[i].nextNodeIndex;
+
+        std::cout << nextIndex << std::endl;
+
+        unsigned int prevIndex = serializedNode[i].prevNodeIndex;
+
+        std::cout << prevIndex << std::endl;
     }
-    //-------- End Data nodes
-    
-    nodes->push_back(n);
 
-    std::cout << n.name << std::endl;
-
-    return nodes->data();
-}
-
-void Deserializer::deserialize(const uint8_t* data, int& currentOffset, std::string& value)
-{
-    while(data[currentOffset] != '\0')
-    {
-        value += data[currentOffset];
-        currentOffset++;
-    }
-    
-    currentOffset +=1;
-}
-
-void Deserializer::deserialize(const uint8_t* data, int& currentOffset, uint32_t& value)
-{
-    uint32_t value1 = data[currentOffset + 0];
-    uint32_t value2 = data[currentOffset + 1];
-    uint32_t value3 = data[currentOffset + 2];
-    uint32_t value4 = data[currentOffset + 3];
-    value = (value1 << 24 | value2 << 16 | value3 << 8 | value4);
-    currentOffset += 4;
+    return &nodes->data()[0];
 }
