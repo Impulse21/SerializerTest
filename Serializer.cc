@@ -12,46 +12,77 @@ uint8_t* Serializer::serialize(const Node *node, uint32_t *outLength)
     }
 
     std::map<const Node*, unsigned> nodeMap;
-    int dataCount = 0;
-    buildNodeMapping(node, nodeMap, dataCount);
+	int cycleIndex;
+    buildNodeMapping(node, nodeMap, cycleIndex);
 
-    int count = nodeMap.size();
+	std::vector<SerializedNode>* buffer = new std::vector<SerializedNode>();
 
-    //uint8_t* data = new uint8_t[sizeof(SerNode) * node count + sizeof(uint32_t)];
-    uint8_t* data = new uint8_t[(sizeof(Node) * count) + (sizeof(Data) * dataCount)];
+	const Node* currNode = node;
+	bool passedCycleStart = false;
+	while (node)
+	{
+		SerializedNode serializedNode;
+		serializedNode.name = currNode->name;
+		serializedNode.dataCount = currNode->dataCount;
 
-    SerializedNode* serializedNode = reinterpret_cast<SerializedNode*>(data);
+		if (serializedNode.dataCount > 0)
+		{
+			serializedNode.data = new Data[serializedNode.dataCount * sizeof(Data)];
+			for (int j = 0; j < serializedNode.dataCount; j++)
+			{
+				serializedNode.data[j] = currNode->data[j];
+			}
+		}
 
-    for(int i = 0; i < count; i++)
-    {
-        serializedNode[i].name = node[i].name;
-        serializedNode[i].dataCount = node[i].dataCount;
-        serializedNode[i].data = node[i].data;
+		serializedNode.nextNodeIndex = (currNode->next) ? nodeMap[currNode->next] : -1;
+		serializedNode.prevNodeIndex = (currNode->prev) ? nodeMap[currNode->prev] : -1;
 
-        serializedNode[i].nextNodeIndex = nodeMap[node[i].next];
-        serializedNode[i].prevNodeIndex = nodeMap[node[i].prev];
+		buffer->push_back(serializedNode);
 
-    }
+		if (currNode->next == nullptr)
+		{
+			break;
+		}
+		else if (static_cast<int>(nodeMap[currNode]) == cycleIndex)
+		{
+			if (passedCycleStart)
+			{
+				break;
+			}
 
-    *outLength = count;
-    return data;
+			passedCycleStart = true;
+		}
+
+		currNode = currNode->next;
+	}
+
+    *outLength = nodeMap.size();
+    return reinterpret_cast<uint8_t*>(buffer->data());
 }
 
-void Serializer::buildNodeMapping(const Node *node, std::map<const Node*, unsigned>& nodeMap, int& dataCount)
+void Serializer::buildNodeMapping(const Node *node, std::map<const Node*, unsigned>& nodeMap, int& cycleIndex)
 {
-    while(node)
+	const Node* currNode = node;
+	cycleIndex = -1;
+
+    while(currNode)
     {
-        dataCount += node->dataCount;
         unsigned n = nodeMap.size();
-        auto ret = nodeMap.insert( std::pair<const Node*, unsigned>(node, n));
+        auto ret = nodeMap.insert( std::pair<const Node*, unsigned>(currNode, n));
         
         // Stop if inserted object already exists
         if(ret.second == false)
         {
+			cycleIndex = nodeMap[currNode];
             break;
         }
 
-        node = node->next;
+		if (currNode->next == nullptr)
+		{
+			break;
+		}
+
+		currNode = currNode->next;
     }
 }
 

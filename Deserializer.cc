@@ -14,36 +14,38 @@ Node* Deserializer::deserialize(const uint8_t* data, uint32_t dataLength)
         return nullptr;
     }
 
-    const SerializedNode* serializedNode = reinterpret_cast<const SerializedNode*>(data);
+    const SerializedNode* buffer = reinterpret_cast<const SerializedNode*>(data);
 
-    std::vector<Node>* nodes = new std::vector<Node>();
+    std::vector<Node*> nodes;
 
-    for(int i = 0; i < dataLength; i++)
+    for(uint32_t i = 0; i < dataLength; i++)
     {
-        Node n;
-        n.name = serializedNode[i].name;
-        n.dataCount = serializedNode[i].dataCount;
+		Node* n = new Node();
+        n->name = buffer[i].name;
+        n->dataCount = buffer[i].dataCount;
         
-        if(n.dataCount > 0)
+        if(n->dataCount > 0)
         {
-            n.data = new Data[sizeof(Data) * n.dataCount];
-            n.data = serializedNode[i].data;
+            n->data = new Data[sizeof(Data) * n->dataCount];
+			for (int j = 0; j < n->dataCount; j++)
+			{
+				n->data[j] = buffer[i].data[j];
+			}
         }
         
-        nodes->push_back(n);
+        nodes.push_back(n);
     }
 
-    std::cout << nodes->size() << std::endl;
-    for(int i = 0; i < dataLength; i++)
+    for(uint32_t i = 0; i < dataLength; i++)
     {
-        unsigned int nextIndex = serializedNode[i].nextNodeIndex;
+        int nextIndex = buffer[i].nextNodeIndex;
 
-        std::cout << nextIndex << std::endl;
+		nodes[i]->next = (nextIndex != -1 ) ? nodes[nextIndex] : nullptr;
 
-        unsigned int prevIndex = serializedNode[i].prevNodeIndex;
+        int prevIndex = buffer[i].prevNodeIndex;
 
-        std::cout << prevIndex << std::endl;
+		nodes[i]->prev = (prevIndex != -1) ? nodes[prevIndex] : nullptr;
     }
 
-    return &nodes->data()[0];
+    return nodes.data()[0];
 }

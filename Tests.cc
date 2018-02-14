@@ -80,7 +80,6 @@ TEST_CASE("dataRoundTrip", "[Serializer]") {
 
 }
 
-/*
 TEST_CASE("linkedRoundTrip", "[Serializer]") {
     Node n0;
     n0.name = "first";
@@ -118,10 +117,6 @@ TEST_CASE("linkedRoundTrip", "[Serializer]") {
     CHECK(result->next->next->name == n2.name);
     CHECK(result->next->next->prev == result->next);
     CHECK(result->next->next->next == nullptr);
-
-    // TODO: Remove, but this prevents meme leaks
-    if(result)
-        delete(result);
 }
 
 TEST_CASE("cycleRoundTrip", "[Serializer]") {
@@ -178,11 +173,6 @@ TEST_CASE("cycleRoundTrip", "[Serializer]") {
     CHECK(n1.name == r1->name);
     CHECK(n2.name == r2->name);
     CHECK(n3.name == r3->name);
-
-    // TODO: Remove, but this prevents meme leaks
-    if(r0)
-        delete(r0);
-
 }
 
 TEST_CASE("shortCycleRoundTrip", "[Serializer]") {
@@ -239,9 +229,4 @@ TEST_CASE("shortCycleRoundTrip", "[Serializer]") {
     CHECK(n1.name == r1->name);
     CHECK(n2.name == r2->name);
     CHECK(n3.name == r3->name);
-
-    // TODO: Remove, but this prevents meme leaks
-    if(r0)
-        delete(r0);
 }
-*/
